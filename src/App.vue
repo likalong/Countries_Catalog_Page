@@ -1,14 +1,14 @@
 <template>
-  <MainPage msg="Welcome to coutries catalog list"/>
+  <CountriesList msg="Welcome to coutries catalog list"/>
 </template>
 
 <script>
-import MainPage from './components/mainPage.vue'
+import CountriesList from './components/CountriesList.vue'
 
 export default {
   name: 'App',
   components: {
-    MainPage
+    CountriesList
   }
 }
 </script>
