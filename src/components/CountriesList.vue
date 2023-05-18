@@ -1,93 +1,159 @@
 <template>
     <div id="app">
       <div>
-        <b-card bg-variant="light">
-          <b-row>
-            <b-col cols="11" >
-              <b-form-input
-                type="text"
-                placeholder="Tüm değerlerde ara"
+        <div class="card-body">
+          <div class="card-title">
+            Fields to Filter
+          </div>
+          <div class="row">
+          
+            <div class="col-9">
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Search all values" 
+                aria-label="Search all values" 
+                aria-describedby="basic-addon2"
                 v-model="filters.all"
-              ></b-form-input>
-            </b-col>
-            <b-col cols="1" class="col-auto">
-              
-              <b-dropdown
-                variant="link"
-                toggle-class="text-decoration-none"
-                no-caret
-                dropleft
               >
-                <template #button-content>
-                  <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
-                </template>
-  
-                <b-dropdown-group header="Filtrelenecek Alanlar" class="small">
+            </div>
+            <div class="col-3">
+              <div class="dropdown">
+                <button 
+                  class="btn btn-secondary 
+                  dropdown-toggle" 
+                  type="button" 
+                  id="fieldsMenuDropdown" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                >
+                  Dropdown button
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
                   <div v-for="header in headers" :key="header">
-                    <b-dropdown-item @click="SelectedFilterRowsItem(header)">
-                      <b-icon
-                        :icon="
-                          filterRow.indexOf(header) != -1 ? 'check' : 'blank'
+                    <li><a class="dropdown-item" @click="SelectedFilterRowsItem(header)">
+                      <i 
+                        :class=" 
+                          filterRow.indexOf(header) != -1 ? 'bi bi-check-lg' : 'bi'
                         "
                         aria-hidden="true"
-                      ></b-icon>
+                      ></i>
                       {{ header }}
-                    </b-dropdown-item>
+                    </a></li>
                   </div>
-                </b-dropdown-group>
-              </b-dropdown>
-            
-            </b-col>
-          </b-row>
-        </b-card>
-  
-        <div class="TableClass">
-          <b-table
-            striped
-            hover
-            :items="filteredItems"
-            :fields="headers"
-            :busy="loading"
-          >
-            <template #table-busy>
-              <div class="text-center text-danger my-2">
-                <b-spinner class="align-middle"></b-spinner>
-                <strong>Yükleniyor...</strong>
+                </ul>
               </div>
-            </template>
-  
-            <template slot="top-row" slot-scope="{ fields }">
-              <td v-for="field in fields" :key="field.key">
-                <div v-if="filterRow.indexOf(field.key) >= 0">
-                  <b-form-input
-                    type="text"
-                    :placeholder="field.label"
-                    v-model="filters[field.key]"
-                  ></b-form-input>
-                </div>
-              </td>
-            </template>
-  
-            <template #cell(flag)="flag">
-              <!-- `data.value` is the value after formatted by the Formatter -->
-              <img :src="flag.value" width="70" />
-            </template>
-          </b-table>
+            </div>
+          </div>
         </div>
+
+        <!-- end filter section -->
+        <!-- <template> -->
+          <div class="TableClass">
+              <table
+                striped
+                hover
+                class="table table-sm"
+                :items="filteredItems"
+                :fields="headers"
+                :busy="loading"
+              >
+                <thead>
+                  <tr>
+                    <th v-for="header in headers" :key="header">{{ header }}</th>
+                  </tr>
+                </thead>
+
+                <template>
+                  <div class="text-center text-danger my-2" v-if="loading">
+                    <div class="spinner-border text-secondary" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                  </div>
+                </template>
+
+                <tbody>
+                  <!-- <template slot="top-row" slot-scope="{ fields }"> -->
+                    <tr v-for="item in items" :key="item">
+                      
+                      <!-- <th scope="row">{{ item.flags.png }}</th> -->
+                      <td class="col-1 text-center align-middle" scope="row">
+                        <img :src="item.flags.png" class="FlagClass img-fluid mx-auto d-block">
+                      </td>
+                      <td class="col-2 ">{{ item.name["official"] }}</td>
+                      <td class="col-2 ">{{ item.cca2 }}</td>
+                      <td class="col-2 ">{{ item.cca3 }}</td>
+                      <td class="col-3 text-wrap ">
+                        <ul
+                         class="list-unstyled float-start d-flex flex-column"
+                        >
+                          <li 
+                            class="d-flex justify-content-start"
+                            v-for="(nativename, key) in item.name.nativeName" :key="nativename">
+                            <span class="fw-semibold">{{ key }}:</span> {{ nativename.official }}
+                          </li>
+                        </ul>
+                      </td>
+                      <td class="col-2 text-wrap ">
+                        <ul class="list-unstyled d-flex flex-column">
+                          <li 
+                            class="d-flex justify-content-center"
+                            v-for="(altname, index) in item.altSpellings" :key="altname">
+                            {{ altname }}<span v-if="index <= item.altSpellings.length">,</span>
+                          </li>
+                        </ul>
+                        
+                      </td>
+                      <td>{{ item.idd.root }}</td>
+                    </tr>
+                  <!-- </template> -->
+
+                
+                </tbody>
+              </table>
+            </div>
+
+            
+
+              <nav aria-label="...">
+                <ul class="pagination">
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                  <li 
+                    v-for="pageNumber in totalPage" :key="pageNumber"
+                    :class="pageNumber == currentPage ? 'page-item active': 'page-item'" 
+
+                  >
+                    <a class="page-link" href="#">
+                    {{ pageNumber }}</a>
+                  </li>
+                  
+                  <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                  </li>
+                </ul>
+              </nav>
+            <!-- </template> -->
+
       </div>
     </div>
-  </template>
-  
-  <script>
+</template>
+
+<script>
   //
   export default {
     name: "App",
     components: {},
     data: () => ({
       // filteredItems: "",
-      headers: ["name", "capital", "region", "flag"],
+      headers: ["Flags", "Name", "CCA2", "CCA3", "Native name", "Alt name", "IDD"],
       items: "",
+      itemsPerPage:25,
+      currentPage: 1,
+      totalPage: 1,
       loading: true,
+      NA: "N/A",
       filterRow: ["capital"],
       filters: {
         all: "",
@@ -111,12 +177,21 @@
       getCountries() {
         this.axios.get("/all").then((res) => {
           this.items = res.data;
+          this.totalPage = this.items.length/this.itemsPerPage;
+          console.log("items type  flage ", typeof(this.items[0].flags))
+          console.log("items type  ", typeof(this.items))
+          console.log("items length  ", this.items.length)
+          console.log("get data ", this.items)
           //  this.filteredItems = res.data;
+          this.items.forEach(ele => {
+            console.log("is independent : ", ele.altSpellings)
+          });
           this.loading = false;
         });
       },
   
       SelectedFilterRowsItem(headerName) {
+        console.log("click filter dropdown")
         if (this.filterRow.indexOf(headerName) != -1) {
           this.filterRow.splice(this.filterRow.indexOf(headerName), 1);
           this.filters[headerName] = '';
@@ -185,5 +260,10 @@
   <style scoped>
   .TableClass {
     margin: calc(2vw);
+  }
+
+  .FlagClass {
+    width: 100px;
+    height: auto;
   }
   </style>
