@@ -74,16 +74,16 @@
 
                 <tbody>
                   <!-- <template slot="top-row" slot-scope="{ fields }"> -->
-                    <tr v-for="item in items" :key="item">
+                    <tr v-for="(item, itemIndex) in items" :key="item">
                       
-                      <!-- <th scope="row">{{ item.flags.png }}</th> -->
-                      <td class="col-1 text-center align-middle" scope="row">
+                      <td scope="row" class="col-1 text-center align-middle">{{ itemsPerPage*(currentPage -1) + itemIndex + 1 }}</td>
+                      <td class="col-1 text-center align-middle">
                         <img :src="item.flags.png" class="FlagClass img-fluid mx-auto d-block">
                       </td>
                       <td class="col-2 ">{{ item.name["official"] }}</td>
                       <td class="col-2 ">{{ item.cca2 }}</td>
                       <td class="col-2 ">{{ item.cca3 }}</td>
-                      <td class="col-3 text-wrap ">
+                      <td class="col-2 text-wrap ">
                         <ul
                          class="list-unstyled float-start d-flex flex-column"
                         >
@@ -117,20 +117,28 @@
 
               <nav aria-label="...">
                 <ul class="pagination">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  <li 
+                    :class="isDisabledPrevBtn   == true ? 'page-item disabled' : 'page-item'"
+                    @click="clickedPrevBtn()"
+
+                  >
+                    <a class="page-link" :href="'#'+this.currentPage" tabindex="-1">Previous</a>
                   </li>
                   <li 
                     v-for="pageNumber in totalPage" :key="pageNumber"
-                    :class="pageNumber == currentPage ? 'page-item active': 'page-item'" 
+                    :class="pageNumber == currentPage ? 'page-item active': 'page-item'"
+                    @click="selectItemToList(pageNumber)"
 
                   >
-                    <a class="page-link" href="#">
+                    <a class="page-link" :href="'#'+pageNumber">
                     {{ pageNumber }}</a>
                   </li>
                   
-                  <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
+                  <li 
+                    :class="isDisabledNextBtn == true ? 'page-item disabled' : 'page-item'"
+                    @click="clickedNextBtn()"
+                  >
+                    <a class="page-link" :href="'#'+this.currentPage">Next</a>
                   </li>
                 </ul>
               </nav>
@@ -147,11 +155,15 @@
     components: {},
     data: () => ({
       // filteredItems: "",
-      headers: ["Flags", "Name", "CCA2", "CCA3", "Native name", "Alt name", "IDD"],
+      headers: ["No", "Flags", "Name", "CCA2", "CCA3", "Native name", "Alt name", "IDD"],
       items: "",
+      originItem: "",
+      allCountriesCount: 0,
       itemsPerPage:25,
       currentPage: 1,
       totalPage: 1,
+      // isDisabledPrevBtn: true,
+      // isDisabledNextBtn: false,
       loading: true,
       NA: "N/A",
       filterRow: ["capital"],
@@ -176,18 +188,48 @@
       },
       getCountries() {
         this.axios.get("/all").then((res) => {
-          this.items = res.data;
-          this.totalPage = this.items.length/this.itemsPerPage;
+          this.originItem = res.data;
+          this.allCountriesCount = this.originItem.length
+          this.totalPage = this.allCountriesCount/this.itemsPerPage;
+          this.isDisabledPrevBtn = true
+
+          if (this.allCountriesCount > 1) this.isDisabledNextBtn = false
+          else this.isDisabledNextBtn = true;
+
+          this.getPaginationItems(1);
+
           console.log("items type  flage ", typeof(this.items[0].flags))
           console.log("items type  ", typeof(this.items))
-          console.log("items length  ", this.items.length)
-          console.log("get data ", this.items)
+          console.log("items length  ", this.items.slice(0,4).length)
+          console.log("get data ", this.items.slice(0,4))
           //  this.filteredItems = res.data;
-          this.items.forEach(ele => {
-            console.log("is independent : ", ele.altSpellings)
-          });
+          // this.items.forEach(ele => {
+            // console.log("is independent : ", ele.altSpellings)
+          // });
           this.loading = false;
         });
+      },
+      getPaginationItems(clickedPageNumber) {
+        console.log("calling paginationItems, clickedPageNumber :", clickedPageNumber)
+        // this.prevPageNumer = this.currentPage;
+        this.currentPage = clickedPageNumber;
+        this.items = "";
+        this.items = this.originItem.slice((clickedPageNumber - 1)*this.itemsPerPage, clickedPageNumber*this.itemsPerPage)
+      },
+
+      selectItemToList(pageNumber) {
+        console.log("current page", this.currentPage)
+        console.log("clicked  page", pageNumber)
+        this.getPaginationItems(pageNumber);
+      },
+      clickedNextBtn(){
+        this.currentPage = this.currentPage + 1;
+        this.getPaginationItems(this.currentPage);
+
+      },
+      clickedPrevBtn(){
+        this.currentPage = this.currentPage - 1;
+        this.getPaginationItems(this.currentPage);
       },
   
       SelectedFilterRowsItem(headerName) {
@@ -202,57 +244,69 @@
     },
   
     computed: {
-      filteredItems() {
-        if (this.loading) return this.emptyItem;
-  
-        let filterByColumn = true;
-        let filtered = [{}];
-  
-        if (this.filters.all != "") filterByColumn = false;
-  
-        function getObjectValuesWithFilter(item, filterCriteria) {
-          let trueCount = 0;
-          if (typeof item == "object") {
-            Object.values(item).some((key) => {
-              if (typeof key != "object") {
-                if (String(key).toLowerCase().includes(filterCriteria))
-                  trueCount++;
-              } else {
-                trueCount += getObjectValuesWithFilter(key, filterCriteria);
-              }
-            });
-          } else {
-            if (String(item).toLowerCase().includes(filterCriteria)) trueCount++;
-          }
-          return trueCount;
-        }
-  
-        if (filterByColumn) {
-          filtered = this.items.filter((item) => {
-            return Object.keys(this.filters).every((key) =>
-              String(item[key])
-                .toLowerCase()
-                .includes(this.filters[key].toLowerCase())
-            );
-          });
-        } else {
-          filtered = [{}];
-  
-          filtered = this.items.filter((item) => {
-            return Object.values(item).some((key) => {
-              let trueCount = 0;
-              trueCount += getObjectValuesWithFilter(
-                key,
-                this.filters.all.toLowerCase()
-              );
-  
-              return trueCount > 0 ? true : false;
-            });
-          });
-        }
-  
-        return filtered.length > 0 ? filtered : this.emptyItem;
+      isDisabledPrevBtn() {
+        if (this.currentPage > 1) return false
+        else return true
       },
+      isDisabledNextBtn () {
+        console.log("current page  isDisabledNextBtn", this.currentPage)
+        if (this.currentPage < this.allCountriesCount/this.itemsPerPage) return false
+        else return true;
+      },
+      // filteredItems() {
+      //   if (this.loading) return this.emptyItem;
+      // },
+      // filteredItems() {
+      //   if (this.loading) return this.emptyItem;
+  
+      //   let filterByColumn = true;
+      //   let filtered = [{}];
+  
+      //   if (this.filters.all != "") filterByColumn = false;
+  
+      //   function getObjectValuesWithFilter(item, filterCriteria) {
+      //     let trueCount = 0;
+      //     if (typeof item == "object") {
+      //       Object.values(item).some((key) => {
+      //         if (typeof key != "object") {
+      //           if (String(key).toLowerCase().includes(filterCriteria))
+      //             trueCount++;
+      //         } else {
+      //           trueCount += getObjectValuesWithFilter(key, filterCriteria);
+      //         }
+      //       });
+      //     } else {
+      //       if (String(item).toLowerCase().includes(filterCriteria)) trueCount++;
+      //     }
+      //     return trueCount;
+      //   }
+  
+      //   if (filterByColumn) {
+      //     filtered = this.items.filter((item) => {
+      //       return Object.keys(this.filters).every((key) =>
+      //         String(item[key])
+      //           .toLowerCase()
+      //           .includes(this.filters[key].toLowerCase())
+      //       );
+      //     });
+      //   } else {
+      //     filtered = [{}];
+  
+      //     filtered = this.items.filter((item) => {
+      //       return Object.values(item).some((key) => {
+      //         let trueCount = 0;
+      //         trueCount += getObjectValuesWithFilter(
+      //           key,
+      //           this.filters.all.toLowerCase()
+      //         );
+  
+      //         return trueCount > 0 ? true : false;
+      //       });
+      //     });
+      //   }
+  
+      //   return filtered.length > 0 ? filtered : this.emptyItem;
+      // },
     },
   };
   </script>
