@@ -1,21 +1,16 @@
-import Vue from 'vue'
-// import  {createApp } from 'vue'
+import {createApp } from 'vue'
 import App from './App.vue'
 
-// createApp(App).mount('#app')
+import "bootstrap/dist/css/bootstrap.min.css"
+import "bootstrap"
 
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-Vue.use(BootstrapVue)
-Vue.use(IconsPlugin)
 
 import axios from './axios';
-Vue.prototype.$axios = axios;
 
+const app =  createApp(App)
 
-Vue.config.productionTip = false
+app.config.globalProperties.axios=axios
+app.config.productionTip = false
 
-new Vue({
-  render: h => h(App),
-}).$mount('#app')
+app.mount('#app')
+

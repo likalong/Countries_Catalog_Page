@@ -1,9 +1,17 @@
 //import Vue from 'vue';
 import axios from 'axios';
 
-const axiosInstance = axios.create({
-    baseURL: "https://restcountries.com/v3.1/"
-});
+const options = {};
+  options.baseURL = "https://restcountries.com/v3.1/";
+
+const axiosInstance = axios.create(options);
+
+axiosInstance.interceptors.response.use(response => {
+    console.log('Successed');
+    return response;
+  }, error => {
+    return Promise.reject(error);
+  });
 
 //Vue.prototype.$axios = axiosInstance;
 

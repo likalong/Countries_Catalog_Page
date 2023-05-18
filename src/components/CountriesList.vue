@@ -109,7 +109,7 @@
         }
       },
       getCountries() {
-        this.$axios.get("/all").then((res) => {
+        this.axios.get("/all").then((res) => {
           this.items = res.data;
           //  this.filteredItems = res.data;
           this.loading = false;
