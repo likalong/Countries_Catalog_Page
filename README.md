@@ -8,4 +8,4 @@ Coding assignment with Vue.js for implementation of simple countries catalog pag
 Below is the image of our page which the top one show, how it looks for the catalog, plus the bottom pagination buttons.
 
 ![listing all countries, search box, and sort option](./Documents/images/example/countries-list.jpg)
-![pagination of the catalog](./Documents/images/example/pagination-list.jpg)
+![pagination of the catalog](./Documents/images/example/pagination.jpg)
