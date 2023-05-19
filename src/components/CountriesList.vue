@@ -161,7 +161,7 @@
 
             
 
-              <nav aria-label="...">
+              <nav aria-label="..." class="d-flex justify-content-center">
                 <ul class="pagination">
                   <li 
                     :class="isDisabledPrevBtn   == true ? 'page-item disabled' : 'page-item'"
@@ -213,7 +213,7 @@ import _ from 'lodash';
       searchText: "",
       filteredItems: "",
       isSearching: false,
-      isSorted: false,
+      // isSorted: false,
       // searchResult: "",
       headers: ["No", "Flags", "Name", "CCA2", "CCA3", "Native name", "Alt name", "IDD"],
       sortItemByList: ["Country Name"],
@@ -299,7 +299,13 @@ import _ from 'lodash';
           this.filteredItems = this.fuzzySearch(this.searchText);
         }
 
+        
+
         this.items = this.filteredItems.slice((clickedPageNumber - 1)*this.itemsPerPage, clickedPageNumber*this.itemsPerPage)
+        
+        if(this.isSorted) {
+        this.sortByName();
+        }
       },
 
       selectItemToList(pageNumber) {
@@ -316,16 +322,6 @@ import _ from 'lodash';
       clickedPrevBtn(){
         this.currentPage = this.currentPage - 1;
         this.getPaginationItems(this.currentPage);
-      },
-  
-      selectedFilterRowsItem(headerName) {
-        console.log("click filter dropdown")
-        if (this.filterRow.indexOf(headerName) != -1) {
-          this.filterRow.splice(this.filterRow.indexOf(headerName), 1);
-          this.filters[headerName] = '';
-        } else {
-          this.filterRow.push(headerName);
-        }
       },
       fuzzySearch(searchStr){
         this.searchText = searchStr;
@@ -417,6 +413,11 @@ import _ from 'lodash';
         if (this.currentPage < this.allCountriesCount/this.itemsPerPage) return false
         else return true;
       },
+      isSorted () {
+        if (!this.sortedBy) {
+          return false;
+        } else return true;
+      }
     },
   };
   </script>
