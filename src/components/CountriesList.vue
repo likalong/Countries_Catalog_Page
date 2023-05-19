@@ -1,91 +1,96 @@
 <template>
     <div id="app">
       <div>
-        <!-- <div class="card-title">
-          Fields to Sort
-        </div> -->
-        <div class="card-body">
-          
-          <div class="row">
-            
-            <div class="col-5">
-              <div class="row">
-                <label for="search-field" class="col-lg-6 col-sm-4">Search Country in list using Fuzzy Search:</label>
-                <div class="col-lg-6 col-sm-6">
-                  <input
-                    id="search-field"
-                    type="text" 
-                    class="form-control" 
-                    placeholder="Input any country's name" 
-                    aria-label="Input any country's name" 
-                    aria-describedby="basic-addon2"
-                    v-model="searchText"
-                    @input="event => fuzzySearch(event.target.value)"
-                  >
-                </div>
-              </div>
+        <div class="card">
+           <div class="card-title" style="font-size: 2rem; font-weight: bold;">
+              Countries Catalog Implementation
+            </div>
+            <div class="card-body">
               
-            </div>
-            <div class="col-3">
-              <div class="dropdown">
-                <button 
-                  class="btn btn-secondary 
-                  dropdown-toggle" 
-                  type="button" 
-                  id="fieldsMenuDropdown" 
-                  data-bs-toggle="dropdown" 
-                  aria-expanded="false"
-                >
-                  Sort By
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
-                  <div v-for="sortBy in sortItemByList" :key="sortBy">
-                    <li><a class="dropdown-item" @click="selectedSortColItem(sortBy)">
-                      <i 
-                        :class=" 
-                          filterRow.indexOf(sortBy) != -1 ? 'bi bi-check-lg' : 'bi'
-                        "
-                        aria-hidden="true"
-                      ></i>
-                      {{ sortBy }}
-                    </a></li>
+              <div class="row">
+                
+                <div class="col-5">
+                  <div class="row">
+                    <label for="search-field" class="col-lg-6 col-sm-4">Search Country in list using Fuzzy Search:</label>
+                    <div class="col-lg-6 col-sm-6">
+                      <input
+                        id="search-field"
+                        type="text" 
+                        class="form-control" 
+                        placeholder="Input any country's name" 
+                        aria-label="Input any country's name" 
+                        aria-describedby="basic-addon2"
+                        v-model="searchText"
+                        @input="event => fuzzySearch(event.target.value)"
+                      >
+                    </div>
                   </div>
-                </ul>
-                <span>{{ sortedBy }}</span>
+                  
+                </div>
+                <div class="col-4">
+                  <div class="dropdown">
+                    <button 
+                      class="btn btn-secondary 
+                      dropdown-toggle" 
+                      type="button" 
+                      id="fieldsMenuDropdown" 
+                      data-bs-toggle="dropdown" 
+                      aria-expanded="false"
+                    >
+                      Sort By
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
+                      <div v-for="sortBy in sortItemByList" :key="sortBy">
+                        <li><a class="dropdown-item" @click="selectedSortColItem(sortBy)">
+                          <i 
+                            :class=" 
+                              sortedBy == sortBy.toLowerCase() ? 'bi bi-check-lg' : 'bi'
+                            "
+                            aria-hidden="true"
+                          ></i>
+                          {{ sortBy }}
+                        </a></li>
+                      </div>
+                    </ul>
+                    <span class="text-nowrap p-1">{{ sortedBy }}</span>
+                  </div>
+                  
+                </div>
+
+                <div class="col-3">
+                  <div class="dropdown">
+                    <button 
+                      class="btn btn-secondary 
+                      dropdown-toggle" 
+                      type="button" 
+                      id="fieldsMenuDropdown" 
+                      data-bs-toggle="dropdown" 
+                      aria-expanded="false"
+                    >
+                      Sort order
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
+                      <div v-for="sortOrder in sortItemOrder" :key="sortOrder">
+                        <li><a class="dropdown-item" @click="selectedSortOrder(sortOrder)">
+                          <i 
+                            :class=" 
+                              sortOrdered == sortOrder ? 'bi bi-check-lg' : 'bi'
+                            "
+                            aria-hidden="true"
+                          ></i>
+                          {{ sortOrder }}
+                        </a></li>
+                      </div>
+                    </ul>
+                    <span class="text-nowrap p-1">{{ sortOrdered }}</span>
+                  </div>
+                  
+                </div>
+
               </div>
             </div>
-
-            <div class="col-3">
-              <div class="dropdown">
-                <button 
-                  class="btn btn-secondary 
-                  dropdown-toggle" 
-                  type="button" 
-                  id="fieldsMenuDropdown" 
-                  data-bs-toggle="dropdown" 
-                  aria-expanded="false"
-                >
-                  Sort order
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
-                  <div v-for="sortOrder in sortItemOrder" :key="sortOrder">
-                    <li><a class="dropdown-item" @click="selectedSortOrder(sortOrder)">
-                      <i 
-                        :class=" 
-                          filterRow.indexOf(sortOrder) != -1 ? 'bi bi-check-lg' : 'bi'
-                        "
-                        aria-hidden="true"
-                      ></i>
-                      {{ sortOrder }}
-                    </a></li>
-                  </div>
-                </ul>
-                <span>{{ sortOrdered }}</span>
-              </div>
-            </div>
-
-          </div>
         </div>
+        
 
         <!-- end filter section -->
         <!-- <template> -->
@@ -208,6 +213,7 @@ import _ from 'lodash';
       searchText: "",
       filteredItems: "",
       isSearching: false,
+      isSorted: false,
       // searchResult: "",
       headers: ["No", "Flags", "Name", "CCA2", "CCA3", "Native name", "Alt name", "IDD"],
       sortItemByList: ["Country Name"],
