@@ -1,214 +1,219 @@
 <template>
-    <div id="app">
-      <div>
-        <div class="card">
-           <div class="card-title" style="font-size: 2rem; font-weight: bold;">
-              Countries Catalog Implementation
-            </div>
-            <div class="card-body">
-              
+  <div id="main">
+    <div class="card">
+        <div class="card-title" style="font-size: 2rem; font-weight: bold;">
+          Countries Catalog Implementation
+        </div>
+        <div class="card-body">
+          
+          <div class="row">
+            
+            <div class="col-5">
               <div class="row">
-                
-                <div class="col-5">
-                  <div class="row">
-                    <label for="search-field" class="col-lg-6 col-sm-4">Search Country in list using Fuzzy Search:</label>
-                    <div class="col-lg-6 col-sm-6">
-                      <input
-                        id="search-field"
-                        type="text" 
-                        class="form-control" 
-                        placeholder="Input any country's name" 
-                        aria-label="Input any country's name" 
-                        aria-describedby="basic-addon2"
-                        v-model="searchText"
-                        @input="event => fuzzySearch(event.target.value)"
-                      >
-                    </div>
-                  </div>
-                  
+                <label for="search-field" class="col-lg-6 col-sm-4">Search Country in list using Fuzzy Search:</label>
+                <div class="col-lg-6 col-sm-6">
+                  <input
+                    id="search-field"
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Input any country's name" 
+                    aria-label="Input any country's name" 
+                    aria-describedby="basic-addon2"
+                    v-model="searchText"
+                    @input="event => fuzzySearch(event.target.value)"
+                  >
                 </div>
-                <div class="col-4">
-                  <div class="dropdown">
-                    <button 
-                      class="btn btn-secondary 
-                      dropdown-toggle" 
-                      type="button" 
-                      id="fieldsMenuDropdown" 
-                      data-bs-toggle="dropdown" 
-                      aria-expanded="false"
-                    >
-                      Sort By
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
-                      <div v-for="sortBy in sortItemByList" :key="sortBy">
-                        <li><a class="dropdown-item" @click="selectedSortColItem(sortBy)">
-                          <i 
-                            :class=" 
-                              sortedBy == sortBy.toLowerCase() ? 'bi bi-check-lg' : 'bi'
-                            "
-                            aria-hidden="true"
-                          ></i>
-                          {{ sortBy }}
-                        </a></li>
-                      </div>
-                    </ul>
-                    <span class="text-nowrap p-1">{{ sortedBy }}</span>
+              </div>
+              
+            </div>
+            <div class="col-4">
+              <div class="dropdown">
+                <button 
+                  class="btn btn-secondary 
+                  dropdown-toggle" 
+                  type="button" 
+                  id="fieldsMenuDropdown" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                >
+                  Sort By
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
+                  <div v-for="sortBy in sortItemByList" :key="sortBy">
+                    <li><a class="dropdown-item" @click="selectedSortColItem(sortBy)">
+                      <i 
+                        :class=" 
+                          sortedBy == sortBy.toLowerCase() ? 'bi bi-check-lg' : 'bi'
+                        "
+                        aria-hidden="true"
+                      ></i>
+                      {{ sortBy }}
+                    </a></li>
                   </div>
-                  
-                </div>
+                </ul>
+                <span class="text-nowrap p-1">{{ sortedBy }}</span>
+              </div>
+              
+            </div>
 
-                <div class="col-3">
-                  <div class="dropdown">
-                    <button 
-                      class="btn btn-secondary 
-                      dropdown-toggle" 
-                      type="button" 
-                      id="fieldsMenuDropdown" 
-                      data-bs-toggle="dropdown" 
-                      aria-expanded="false"
-                    >
-                      Sort order
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
-                      <div v-for="sortOrder in sortItemOrder" :key="sortOrder">
-                        <li><a class="dropdown-item" @click="selectedSortOrder(sortOrder)">
-                          <i 
-                            :class=" 
-                              sortOrdered == sortOrder ? 'bi bi-check-lg' : 'bi'
-                            "
-                            aria-hidden="true"
-                          ></i>
-                          {{ sortOrder }}
-                        </a></li>
-                      </div>
-                    </ul>
-                    <span class="text-nowrap p-1">{{ sortOrdered }}</span>
+            <div class="col-3">
+              <div class="dropdown">
+                <button 
+                  class="btn btn-secondary 
+                  dropdown-toggle" 
+                  type="button" 
+                  id="fieldsMenuDropdown" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                >
+                  Sort order
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="fieldsMenuDropdown">
+                  <div v-for="sortOrder in sortItemOrder" :key="sortOrder">
+                    <li><a class="dropdown-item" @click="selectedSortOrder(sortOrder)">
+                      <i 
+                        :class=" 
+                          sortOrdered == sortOrder ? 'bi bi-check-lg' : 'bi'
+                        "
+                        aria-hidden="true"
+                      ></i>
+                      {{ sortOrder }}
+                    </a></li>
                   </div>
-                  
-                </div>
+                </ul>
+                <span class="text-nowrap p-1">{{ sortOrdered }}</span>
+              </div>
+              
+            </div>
 
+          </div>
+        </div>
+    </div>
+    
+    <!-- end filter section -->
+    
+    <div class="TableClass">
+        <table
+          striped
+          hover
+          class="table table-sm"
+          :temsInPage="filteredItems"
+          :fields="headers"
+          :busy="loading"
+        >
+          <thead>
+            <tr>
+              <th v-for="header in headers" :key="header">{{ header }}</th>
+            </tr>
+          </thead>
+
+          <template v-if="loading">
+            <div class="text-center text-danger my-2" >
+              <div class="spinner-border text-secondary" role="status">
+                <span class="sr-only">Loading...</span>
               </div>
             </div>
-        </div>
-        
+          </template>
 
-        <!-- end filter section -->
-        <!-- <template> -->
-          <div class="TableClass">
-              <table
-                striped
-                hover
-                class="table table-sm"
-                :items="filteredItems"
-                :fields="headers"
-                :busy="loading"
-              >
-                <thead>
-                  <tr>
-                    <th v-for="header in headers" :key="header">{{ header }}</th>
-                  </tr>
-                </thead>
-
-                <template>
-                  <div class="text-center text-danger my-2" v-if="loading">
-                    <div class="spinner-border text-secondary" role="status">
-                      <span class="sr-only">Loading...</span>
-                    </div>
-                  </div>
-                </template>
-
-                <tbody>
-                  <!-- <template slot="top-row" slot-scope="{ fields }"> -->
-                    <tr v-for="(item, itemIndex) in items" :key="item">
-                      
-                      <td scope="row" class="col-1 text-center align-middle">{{ itemsPerPage*(currentPage -1) + itemIndex + 1 }}</td>
-                      <td class="col-1 text-center align-middle">
-                        <img :src="item.flags ? item.flags.png: item.item.flags.png" class="FlagClass img-fluid mx-auto d-block">
-                      </td>
-                      <td class="col-2 ">{{ item.name ? item.name["official"] : item.item.name["official"] }}</td>
-                      <td class="col-2 ">{{ item.cca2 || item.item.cca2 }}</td>
-                      <td class="col-2 ">{{ item.cca3  || item.item.cca3}}</td>
-                      <td class="col-2 text-wrap ">
-                        <ul
-                         class="list-unstyled float-start d-flex flex-column"
-                        >
-                          <li 
-                            class="d-flex justify-content-start"
-                            v-for="(nativename, key) in item.name.nativeName" :key="nativename">
-                            <span class="fw-semibold">{{ key }}:</span> {{ nativename.official }}
-                          </li>
-                        </ul>
-                      </td>
-                      <td class="col-2 text-wrap ">
-                        <ul class="list-unstyled d-flex flex-column">
-                          <li 
-                            class="d-flex justify-content-center"
-                  
-                            v-for="(altname, index) in item.altSpellings" :key="altname">
-                            {{ altname }}<span v-if="index <= item.altSpellings.length">,</span>
-                          </li>
-                        </ul>
-                        
-                      </td>
-                      <td>{{ item.idd.root}}</td>
-                    </tr>
-                  <!-- </template> -->
-
+          <tbody>
+            <!-- <template slot="top-row" slot-scope="{ fields }"> -->
+              <tr 
+                v-for="(item, itemIndex) in temsInPage" :key="item" 
+                @click=" showCountryDetail(item)"
+                >
                 
-                </tbody>
-              </table>
-            </div>
-
+                <td scope="row" class="col-1 text-center align-middle">{{ itemsPerPage*(currentPage -1) + itemIndex + 1 }}</td>
+                <td class="col-1 text-center align-middle">
+                  <img :src="item.flags ? item.flags.png: item.item.flags.png" class="FlagClass img-fluid mx-auto d-block">
+                </td>
+                <td class="col-2 ">{{ item.name ? item.name["official"] : item.item.name["official"] }}</td>
+                <td class="col-2 ">{{ item.cca2 || item.item.cca2 }}</td>
+                <td class="col-2 ">{{ item.cca3  || item.item.cca3}}</td>
+                <td class="col-2 text-wrap ">
+                  <ul
+                    class="list-unstyled float-start d-flex flex-column"
+                  >
+                    <li 
+                      class="d-flex justify-content-start"
+                      v-for="(nativename, key) in item.name.nativeName" :key="nativename">
+                      <span class="fw-semibold">{{ key }}:</span> {{ nativename.official }}
+                    </li>
+                  </ul>
+                </td>
+                <td class="col-2 text-wrap ">
+                  <ul class="list-unstyled d-flex flex-column">
+                    <li 
+                      class="d-flex justify-content-center"
             
-
-              <nav aria-label="..." class="d-flex justify-content-center">
-                <ul class="pagination">
-                  <li 
-                    :class="isDisabledPrevBtn   == true ? 'page-item disabled' : 'page-item'"
-                    @click="clickedPrevBtn()"
-
-                  >
-                    <a class="page-link" :href="'#'+this.currentPage" tabindex="-1">Previous</a>
-                  </li>
-                  <template v-if="totalPage > 1">
-                    <li
-                      v-for="pageNumber in totalPage" :key="pageNumber"
-                      :class="pageNumber == currentPage ? 'page-item active': 'page-item'"
-                      @click="selectItemToList(pageNumber)"
-
-                    >
-                      <a class="page-link" :href="'#'+pageNumber">
-                      {{ pageNumber }}</a>
+                      v-for="(altname, index) in item.altSpellings" :key="altname">
+                      {{ altname }}<span v-if="index <= item.altSpellings.length">,</span>
                     </li>
-                  </template>
-                  <li
-                      v-if="totalPage == 1"
-                    >
-                      <a class="page-link" href="#">
-                      {{ 1 }}</a>
-                    </li>
+                  </ul>
                   
-                  <li 
-                    :class="isDisabledNextBtn == true ? 'page-item disabled' : 'page-item'"
-                    @click="clickedNextBtn()"
-                  >
-                    <a class="page-link" :href="'#'+this.currentPage">Next</a>
-                  </li>
-                </ul>
-              </nav>
+                </td>
+                <td>{{ item.idd.root}}</td>
+              </tr>
             <!-- </template> -->
 
-      </div>
+          
+          </tbody>
+        </table>
     </div>
+
+    <!-- footer pagination btns -->
+    <nav aria-label="..." class="d-flex justify-content-center">
+      <ul class="pagination">
+        <li 
+          :class="isDisabledPrevBtn   == true ? 'page-item disabled' : 'page-item'"
+          @click="clickedPrevBtn()"
+        >
+          <a class="page-link" :href="'#'+this.currentPage" tabindex="-1">Previous</a>
+        </li>
+        <template v-if="totalPage > 1">
+          <li
+            v-for="pageNumber in totalPage" :key="pageNumber"
+            :class="pageNumber == currentPage ? 'page-item active': 'page-item'"
+            @click="selectItemToList(pageNumber)"
+
+          >
+            <a class="page-link" :href="'#'+pageNumber">
+            {{ pageNumber }}</a>
+          </li>
+        </template>
+        <li
+            v-if="totalPage == 1"
+          >
+            <a class="page-link" href="#">
+            {{ 1 }}</a>
+          </li>
+        
+        <li 
+          :class="isDisabledNextBtn == true ? 'page-item disabled' : 'page-item'"
+          @click="clickedNextBtn()"
+        >
+          <a class="page-link" :href="'#'+this.currentPage">Next</a>
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+
+  <DetailModal
+    :prop-show-detail-modal="propShowDetailModal" 
+    @update-show-detail-modal="onUpdateshowDetailModal"
+    :prop-country-info="countryInfo"
+  />
+
 </template>
 
 <script>
 import Fuse from 'fuse.js';
 import _ from 'lodash';
+import DetailModal from './DetailModal.vue';
   //
   export default {
     name: "App",
-    components: {},
+    components: {DetailModal},
     data: () => ({
       searchText: "",
       filteredItems: "",
@@ -218,8 +223,8 @@ import _ from 'lodash';
       headers: ["No", "Flags", "Name", "CCA2", "CCA3", "Native name", "Alt name", "IDD"],
       sortItemByList: ["Country Name"],
       sortItemOrder: ["ASC", "DESC"],
-      items: "",
-      originItem: "",
+      itemsInPage: "",
+      allCountries: "",
       allCountriesCount: 0,
       itemsPerPage:25,
       currentPage: 1,
@@ -244,6 +249,9 @@ import _ from 'lodash';
       sortOrdered: "asc",
   
       emptyItem: [{}],
+      propShowDetailModal: false,
+      countryInfo: null,
+      clickedCountryName: ""
     }),
     created() {
       this.getCountries();
@@ -269,9 +277,9 @@ import _ from 'lodash';
       },
       getCountries() {
         this.axios.get("/all?fields=name,altSpellings,cca2,cca3,flags,idd").then((res) => {
-          this.originItem = res.data;
-          this.filteredItems = this.originItem;
-          this.updateTotalCountriesCount(this.originItem.length);
+          this.allCountries = res.data;
+          this.filteredItems = this.allCountries;
+          this.updateTotalCountriesCount(this.allCountries.length);
           this.isDisabledPrevBtn = true
 
           if (this.allCountriesCount > 1) this.isDisabledNextBtn = false
@@ -282,7 +290,7 @@ import _ from 'lodash';
           // console.log("items type  flage ", typeof(this.items[0].flags))
           // console.log("items type  ", typeof(this.items))
           // console.log("items length  ", this.items.slice(0,4).length)
-          console.log("get data ", this.items.slice(0,4))
+          // console.log("get data ", this.temsInPage.slice(0,4))
           //  this.filteredItems = res.data;
           // this.items.forEach(ele => {
             // console.log("is independent : ", ele.altSpellings)
@@ -294,14 +302,12 @@ import _ from 'lodash';
         console.log("calling paginationItems, clickedPageNumber :", clickedPageNumber)
         // this.prevPageNumer = this.currentPage;
         this.currentPage = clickedPageNumber;
-        this.items = "";
+        this.temsInPage = "";
         if(this.isSearching){
           this.filteredItems = this.fuzzySearch(this.searchText);
         }
 
-        
-
-        this.items = this.filteredItems.slice((clickedPageNumber - 1)*this.itemsPerPage, clickedPageNumber*this.itemsPerPage)
+        this.temsInPage = this.filteredItems.slice((clickedPageNumber - 1)*this.itemsPerPage, clickedPageNumber*this.itemsPerPage)
         
         if(this.isSorted) {
         this.sortByName();
@@ -311,7 +317,7 @@ import _ from 'lodash';
       selectItemToList(pageNumber) {
         console.log("current page", this.currentPage)
         console.log("clicked  page", pageNumber)
-        // this.filteredItems = this.originItem;
+        // this.filteredItems = this.allCountries;
         this.getPaginationItems(pageNumber);
       },
       clickedNextBtn(){
@@ -340,7 +346,7 @@ import _ from 'lodash';
         }
         console.log("search str : ", searchStr)
 
-        const fuse = new Fuse(this.originItem, options)
+        const fuse = new Fuse(this.allCountries, options)
 
         searchRes = fuse.search(searchStr);
         const resLength = searchRes.length;
@@ -353,7 +359,7 @@ import _ from 'lodash';
         console.log("this.filteredItems 1 : ", this.filteredItems)
 
         });
-        this.items = this.filteredItems;
+        this.temsInPage = this.filteredItems;
         console.log("this.filteredItems : ", this.filteredItems)
 
         this.updateTotalCountriesCount(resLength);
@@ -361,13 +367,13 @@ import _ from 'lodash';
 
 
         if(this.searchText == "") {
-          console.log("no search, origin.length = ", this.originItem.length)
+          console.log("no search, origin.length = ", this.allCountries.length)
           this.isSearching = false;
           
-          this.filteredItems = this.originItem;
-          this.item = this.originItem;
+          this.filteredItems = this.allCountries;
+          this.item = this.allCountries;
           this.getPaginationItems(1);
-          this.updateTotalCountriesCount(this.originItem.length);
+          this.updateTotalCountriesCount(this.allCountries.length);
           
         }
 
@@ -390,19 +396,50 @@ import _ from 'lodash';
 
       sortByName() {
         if(this.sortOrdered && this.sortedBy){
-          let sortedItems =  _.orderBy( this.items, [item => {
+          let sortedItems =  _.orderBy( this.itemsInPage, [item => {
               // console.log("sorting item ", item.name.official.toLowerCase())
               return item.name.official.toLowerCase()
             }], [this.sortOrdered ])
             
-            this.items = sortedItems;
+            this.temsInPage = sortedItems;
             // console.log("items after sort ", sortedItems)
         }
       },
+
+      getCountrieByName(name) {
+        console.log(name)
+        // const queryStr = "/name/eesti"
+        const queryStr = "/name/"+name
+        this.axios.get(queryStr).then((res) => {
+          this.countryInfo = res.data[0];
+          // countryInfo
+          
+          console.log("fetch country data after clicked::::::; ", this.countryInfo)
+        
+        });
+      },
+
+      async showCountryDetail(clickedCountry){
+        let clickedName = "";
+
+        if(clickedCountry.name){
+          clickedName = clickedCountry.name["common"];
+        } else clickedName = clickedCountry.item.name["common"]
+
+        console.log("Clicked country :: ",clickedCountry)
+        console.log("Clicked country name :: ",clickedName)
+
+        await this.getCountrieByName(clickedName);
+        await this.onUpdateshowDetailModal(true);
+        
+      },
+
+      onUpdateshowDetailModal(newValue){
+        // console.log("on update show detail")
+        this.propShowDetailModal = newValue
+      }
     },
 
-
-  
     computed: {
       isDisabledPrevBtn() {
         if (this.currentPage > 1) return false
@@ -427,7 +464,7 @@ import _ from 'lodash';
     margin: calc(2vw);
   }
 
-  .FlagClass {
+  :global(.FlagClass) {
     width: 100px;
     height: auto;
   }
