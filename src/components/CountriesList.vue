@@ -91,8 +91,18 @@
     </div>
     
     <!-- end filter section -->
+
+    <template v-if="loading">
+      <div class="text-center text-info my-2 full-sreen" >
+        <div class="spinner-border text-secondary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <span style="padding-left: 1rem;">Fetching countries data...</span>
+      </div>
+    </template>
     
-    <div class="TableClass">
+    <template v-else>
+      <div class="TableClass">
         <table
           striped
           hover
@@ -107,13 +117,6 @@
             </tr>
           </thead>
 
-          <template v-if="loading">
-            <div class="text-center text-danger my-2" >
-              <div class="spinner-border text-secondary" role="status">
-                <span class="sr-only">Loading...</span>
-              </div>
-            </div>
-          </template>
 
           <tbody>
             <!-- <template slot="top-row" slot-scope="{ fields }"> -->
@@ -158,18 +161,20 @@
           
           </tbody>
         </table>
-    </div>
+      </div>
+    </template>
+    
 
     <!-- footer pagination btns -->
     <nav aria-label="..." class="d-flex justify-content-center">
       <ul class="pagination">
         <li 
-          :class="isDisabledPrevBtn   == true ? 'page-item disabled' : 'page-item'"
+          :class="isDisabledPrevBtn   == true || loading ? 'page-item disabled' : 'page-item'"
           @click="clickedPrevBtn()"
         >
           <a class="page-link" :href="'#'+this.currentPage" tabindex="-1">Previous</a>
         </li>
-        <template v-if="totalPage > 1">
+        <template v-if="totalPage > 1 && !loading">
           <li
             v-for="pageNumber in totalPage" :key="pageNumber"
             :class="pageNumber == currentPage ? 'page-item active': 'page-item'"
@@ -189,7 +194,7 @@
           </li>
         
         <li 
-          :class="isDisabledNextBtn == true ? 'page-item disabled' : 'page-item'"
+          :class="isDisabledNextBtn == true || loading ? 'page-item disabled' : 'page-item'"
           @click="clickedNextBtn()"
         >
           <a class="page-link" :href="'#'+this.currentPage">Next</a>
@@ -203,6 +208,7 @@
     :prop-show-detail-modal="propShowDetailModal" 
     @update-show-detail-modal="onUpdateshowDetailModal"
     :prop-country-info="countryInfo"
+    :prop-is-loading="propIsLoading"
   />
 
 </template>
@@ -257,7 +263,8 @@ import DetailModal from './DetailModal.vue';
       emptyItem: [{}],
       propShowDetailModal: false,
       countryInfo: null,
-      clickedCountryName: ""
+      clickedCountryName: "",
+      propIsLoading: false,
     }),
     created() {
       // console.log("current page: ", this.currentPage) 
@@ -449,8 +456,10 @@ import DetailModal from './DetailModal.vue';
         console.log(name)
         // const queryStr = "/name/eesti"
         const queryStr = "/name/"+name
+        this.propIsLoading = true;
         this.axios.get(queryStr).then((res) => {
           this.countryInfo = res.data[0];
+          this.propIsLoading = false
           // countryInfo
           
           console.log("fetch country data after clicked::::::; ", this.countryInfo)
