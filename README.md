@@ -9,3 +9,8 @@ Below is the image of our page which the top one show, how it looks for the cata
 
 ![listing all countries, search box, and sort option](./Documents/images/example/countries-list.jpg)
 ![pagination of the catalog](./Documents/images/example/pagination.jpg)
+
+
+### Simple modal to show the more country information has been implemented as well using Naive UI components
+By clicking on the country name in the list, you'll get the modal box pop up to see the information.
+![pagination of the catalog](./Documents/images/example/modal-box-country-info.png)
