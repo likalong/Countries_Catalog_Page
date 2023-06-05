@@ -192,11 +192,11 @@ export default defineComponent({
   },
   computed:{
     isShowModal () {
-      console.log("compute modal child ::::  prop show modal : ", this.propShowDetailModal)
+      // console.log("compute modal child ::::  prop show modal : ", this.propShowDetailModal)
       return this.propShowDetailModal
     },
     countryInfo () {
-      console.log("in child get country info ", this.propCountryInfo)
+      // console.log("in child get country info ", this.propCountryInfo)
       if(this.propCountryInfo != null) {
         return this.propCountryInfo
       } else return null;

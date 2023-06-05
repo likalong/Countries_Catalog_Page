@@ -97,7 +97,7 @@
           striped
           hover
           class="table table-sm"
-          :temsInPage="filteredItems"
+          :itemsInPage="filteredItems"
           :fields="headers"
           :busy="loading"
         >
@@ -118,7 +118,7 @@
           <tbody>
             <!-- <template slot="top-row" slot-scope="{ fields }"> -->
               <tr 
-                v-for="(item, itemIndex) in temsInPage" :key="item" 
+                v-for="(item, itemIndex) in itemsInPage" :key="item" 
                 @click=" showCountryDetail(item)"
                 >
                 
@@ -176,6 +176,7 @@
             @click="selectItemToList(pageNumber)"
 
           >
+            
             <a class="page-link" :href="'#'+pageNumber">
             {{ pageNumber }}</a>
           </li>
@@ -210,6 +211,10 @@
 import Fuse from 'fuse.js';
 import _ from 'lodash';
 import DetailModal from './DetailModal.vue';
+// import { RouterLink } from 'vue-router'
+
+
+
   //
   export default {
     name: "App",
@@ -228,6 +233,7 @@ import DetailModal from './DetailModal.vue';
       allCountriesCount: 0,
       itemsPerPage:25,
       currentPage: 1,
+      prevPageNumer: null,
       totalPage: 1,
       // isDisabledPrevBtn: true,
       // isDisabledNextBtn: false,
@@ -254,16 +260,28 @@ import DetailModal from './DetailModal.vue';
       clickedCountryName: ""
     }),
     created() {
-      this.getCountries();
+      // console.log("current page: ", this.currentPage) 
+      
+      let route_page_numb = this.getPageNumberFromUrl()
+      this.getCountries(route_page_numb);
     },
     methods: {
-      CreateEmptyItem() {
-        for (let i = 0; i < this.headers.length; i++) {
-          this.emptyItem[this.headers[i]] = "";
+      getPageNumberFromUrl(){
+        // console.log("current route: on created ", this.$route)
+
+      console.log("current route: ", this.$route) 
+        let route_page_numb = null;
+        if(this.$route && this.$route.params){
+          route_page_numb = this.$route.params.page_number
+          this.currentPage = route_page_numb;
         }
+        // if(route_page_numb && (route_page_numb != clickedPageNumber)){
+        //   this.currentPage = route_page_numb;
+        // } else this.currentPage = clickedPageNumber;
+        return route_page_numb;
       },
       updateTotalCountriesCount(totalItems){
-        console.log("total length ", totalItems)
+        // console.log("total length ", totalItems)
         // this.allCountriesCount = 75;
         this.allCountriesCount = totalItems;
         let countTotalPage = this.allCountriesCount/this.itemsPerPage;
@@ -275,7 +293,7 @@ import DetailModal from './DetailModal.vue';
           } else this.totalPage = actualNumber;
         } else this.totalPage = 1;
       },
-      getCountries() {
+      getCountries(currentPage=null) {
         this.axios.get("/all?fields=name,altSpellings,cca2,cca3,flags,idd").then((res) => {
           this.allCountries = res.data;
           this.filteredItems = this.allCountries;
@@ -285,12 +303,12 @@ import DetailModal from './DetailModal.vue';
           if (this.allCountriesCount > 1) this.isDisabledNextBtn = false
           else this.isDisabledNextBtn = true;
 
-          this.getPaginationItems(1);
+          this.getPaginationItems(currentPage || 1);
 
           // console.log("items type  flage ", typeof(this.items[0].flags))
           // console.log("items type  ", typeof(this.items))
           // console.log("items length  ", this.items.slice(0,4).length)
-          // console.log("get data ", this.temsInPage.slice(0,4))
+          // console.log("get data ", this.itemsInPage.slice(0,4))
           //  this.filteredItems = res.data;
           // this.items.forEach(ele => {
             // console.log("is independent : ", ele.altSpellings)
@@ -299,15 +317,13 @@ import DetailModal from './DetailModal.vue';
         });
       },
       getPaginationItems(clickedPageNumber) {
-        console.log("calling paginationItems, clickedPageNumber :", clickedPageNumber)
-        // this.prevPageNumer = this.currentPage;
-        this.currentPage = clickedPageNumber;
-        this.temsInPage = "";
-        if(this.isSearching){
-          this.filteredItems = this.fuzzySearch(this.searchText);
-        }
+        // console.log("calling paginationItems, clickedPageNumber :", clickedPageNumber)
 
-        this.temsInPage = this.filteredItems.slice((clickedPageNumber - 1)*this.itemsPerPage, clickedPageNumber*this.itemsPerPage)
+        // this.prevPageNumer = this.currentPage;
+        this.currentPage = clickedPageNumber
+     
+        this.itemsInPage = "";
+        this.itemsInPage = this.filteredItems.slice((clickedPageNumber - 1)*this.itemsPerPage, clickedPageNumber*this.itemsPerPage)
         
         if(this.isSorted) {
         this.sortByName();
@@ -315,8 +331,8 @@ import DetailModal from './DetailModal.vue';
       },
 
       selectItemToList(pageNumber) {
-        console.log("current page", this.currentPage)
-        console.log("clicked  page", pageNumber)
+        // console.log("current page", this.currentPage)
+        // console.log("clicked  page", pageNumber)
         // this.filteredItems = this.allCountries;
         this.getPaginationItems(pageNumber);
       },
@@ -329,10 +345,23 @@ import DetailModal from './DetailModal.vue';
         this.currentPage = this.currentPage - 1;
         this.getPaginationItems(this.currentPage);
       },
+      updateUrlParam(params){
+        this.$router.replace({
+          name: this.$route.name,
+          params,
+        })
+      },
       fuzzySearch(searchStr){
         this.searchText = searchStr;
-
-        this.currentPage = 1;
+        
+        if(searchStr && !this.isSearching){
+          this.isSearching = true;
+          this.prevPageNumer = this.currentPage;
+          console.log("searching --------- prevPageNumber ", this.prevPageNumer)
+        }
+       
+        this.currentPage = 1
+        this.updateUrlParam({page_number: this.currentPage})
         let searchRes = "";
         this.filteredItems = []
         const options = {
@@ -344,35 +373,45 @@ import DetailModal from './DetailModal.vue';
           // Search in `author` and in `tags` array
           keys: this.searchKey
         }
-        console.log("search str : ", searchStr)
+        // console.log("search str : ", searchStr)
 
         const fuse = new Fuse(this.allCountries, options)
 
         searchRes = fuse.search(searchStr);
         const resLength = searchRes.length;
-        console.log("searchResult length : ", searchRes.length)
-        console.log("searchResult str : ", searchRes)
+        // console.log("searchResult length : ", searchRes.length)
+        // console.log("searchResult str : ", searchRes)
         searchRes.forEach(data => {
-        console.log("filtered data : ", data.item)
+        // console.log("filtered data : ", data.item)
         this.filteredItems.push(data.item);
 
-        console.log("this.filteredItems 1 : ", this.filteredItems)
+        // console.log("this.filteredItems 1 : ", this.filteredItems)
 
         });
         this.temsInPage = this.filteredItems;
-        console.log("this.filteredItems : ", this.filteredItems)
+        // console.log("this.filteredItems : ", this.filteredItems)
 
         this.updateTotalCountriesCount(resLength);
-        this.getPaginationItems(1);
+        this.getPaginationItems(this.currentPage);
 
 
         if(this.searchText == "") {
+          
           console.log("no search, origin.length = ", this.allCountries.length)
           this.isSearching = false;
           
           this.filteredItems = this.allCountries;
           this.item = this.allCountries;
-          this.getPaginationItems(1);
+
+          //checking current page from url
+          console.log("prev url page numb in empty search ", this.prevPageNumer)
+          if(this.prevPageNumer){
+            this.currentPage = this.prevPageNumer
+            this.updateUrlParam({page_number: this.prevPageNumer})
+            console.log("current page, empty in search ", this.currentPage)
+          } else this.currentPage = 1
+
+          this.getPaginationItems(this.currentPage);
           this.updateTotalCountriesCount(this.allCountries.length);
           
         }
@@ -397,11 +436,11 @@ import DetailModal from './DetailModal.vue';
       sortByName() {
         if(this.sortOrdered && this.sortedBy){
           let sortedItems =  _.orderBy( this.itemsInPage, [item => {
-              // console.log("sorting item ", item.name.official.toLowerCase())
+              console.log("sorting item ", item.name.official.toLowerCase())
               return item.name.official.toLowerCase()
             }], [this.sortOrdered ])
             
-            this.temsInPage = sortedItems;
+            this.itemsInPage = sortedItems;
             // console.log("items after sort ", sortedItems)
         }
       },
@@ -446,7 +485,7 @@ import DetailModal from './DetailModal.vue';
         else return true
       },
       isDisabledNextBtn () {
-        console.log("current page  isDisabledNextBtn", this.currentPage)
+        // console.log("current page in isDisabledNextBtn", this.currentPage)
         if (this.currentPage < this.allCountriesCount/this.itemsPerPage) return false
         else return true;
       },
