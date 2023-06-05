@@ -1,7 +1,16 @@
 # Countries_Catalog_Page
-Coding assignment with Vue.js for implementation of simple countries catalog page with fews features:
+Coding assignment with Vue.js 3 for implementation of simple countries catalog page with fews features:
 - sort by country name.
 - and search by country name using fuzzy algorithm.
+
+## Requirement Libraries:
+- VueJs 3
+- Axios
+- Bootstrap 5
+- FuseJs
+- Vue-router
+- Naive-UI
+
 
 # Web page Interface Overview, 
 
@@ -14,3 +23,6 @@ Below is the image of our page which the top one show, how it looks for the cata
 ### Simple modal to show the more country information has been implemented as well using Naive UI components
 By clicking on the country name in the list, you'll get the modal box pop up to see the information.
 ![pagination of the catalog](./Documents/images/example/modal-box-country-info.png)
+
+#### Demo
+
