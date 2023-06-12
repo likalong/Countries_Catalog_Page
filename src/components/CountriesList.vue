@@ -4,6 +4,7 @@
         <div class="card-title" style="font-size: 2rem; font-weight: bold;">
           Countries Catalog Implementation
         </div>
+        <p class="d-flex"><router-link :to="{name:'DashboardPage'}"> Dashboard </router-link></p>
         <div class="card-body">
           
           <div class="row">
@@ -213,18 +214,23 @@
 
 </template>
 
+
+
 <script>
 import Fuse from 'fuse.js';
 import _ from 'lodash';
 import DetailModal from './DetailModal.vue';
-// import { RouterLink } from 'vue-router'
+import { RouterLink } from 'vue-router'
 
 
 
   //
   export default {
     name: "App",
-    components: {DetailModal},
+    components: {
+      DetailModal,
+      RouterLink,
+    },
     data: () => ({
       searchText: "",
       filteredItems: "",

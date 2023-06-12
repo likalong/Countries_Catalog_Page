@@ -1,15 +1,16 @@
 <template>
-  <CountriesList msg="Welcome to coutries catalog list"/>
+  <router-view />
+  <!-- <CountriesList msg="Welcome to coutries catalog list"/> -->
 </template>
 
 <script>
-import CountriesList from './components/CountriesList.vue'
+// import CountriesList from './components/CountriesList.vue'
 
 export default {
   name: 'App',
-  components: {
-    CountriesList
-  }
+  // components: {
+  //   CountriesList
+  // }
 }
 </script>
 

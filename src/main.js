@@ -1,24 +1,31 @@
 import {createApp } from 'vue'
-import App from './App.vue'
-// import DetailModal from './components/DetailModal.vue';
+import App from '@/App.vue'
+import DashboardPage from '@/components/Dashboard.vue'
+import CountriesList from '@/components/CountriesList.vue'
+
 
 
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 
 // custom css
-import './assets/css/global.css'
+import './css/global.css'
 
-import { createRouter,  createWebHashHistory, RouterLink} from 'vue-router'
+import { createRouter,  createWebHistory} from 'vue-router'
+
+// import ElementPlus from 'element-plus'
+// import './element-variables.scss'
+
 
 const routes = [
-  { path: '/', name:"Home", component: App },
-  { path: '/:page_number',name:"Pagination", component: App },
+  { path: '/', name:"Homepage", component: CountriesList },
+  { path: '/:page_number',name:"Pagination", component: CountriesList },
+  { path: '/dashboard', name:"DashboardPage", component: DashboardPage },
 ]
 
 const router = createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes, // short for `routes: routes`
 })
 
@@ -31,7 +38,9 @@ app.config.globalProperties.axios=axios
 app.config.productionTip = false
 
 app.use(router)
-app.use(RouterLink)
+
+
+// app.use(ElementPlus)
 
 
 // console.log("route query :: ", route.query)
