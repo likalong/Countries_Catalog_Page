@@ -122,6 +122,7 @@
           <tbody>
             <!-- <template slot="top-row" slot-scope="{ fields }"> -->
               <tr 
+                class="even:bg-slate-50"
                 v-for="(item, itemIndex) in itemsInPage" :key="item" 
                 @click=" showCountryDetail(item)"
                 >
